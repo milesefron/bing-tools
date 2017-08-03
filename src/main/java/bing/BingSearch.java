@@ -1,17 +1,17 @@
 package bing;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Iterator;
-
-import javax.net.ssl.HttpsURLConnection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -26,6 +26,18 @@ public class BingSearch {
 	public static final String API_COUNT_ARG = "count";
 	public static final String API_MKT_ARG = "mkt";
 	public static final String API_SAFE_ARG = "safesearch";
+	public static final String API_JSON_KEY_1 = "webPages";
+	public static final String API_JSON_KEY_2 = "value";
+	
+	public static final String RESULTS_FIELD_URL = "url";
+	public static final String RESULTS_FIELD_NAME = "name";
+	public static final String RESULTS_FIELD_SNIPPET = "snippet";
+	
+	public static final String REGEX_URL1 = "http.*&v=1&r=";
+	public static final String REGEX_URL2 = "&p=.*";
+
+	private Pattern pattern1 = Pattern.compile(BingSearch.REGEX_URL1);
+	private Pattern pattern2 = Pattern.compile(BingSearch.REGEX_URL2);
 	
 	private String userSubscriptionID;
 	
@@ -36,11 +48,21 @@ public class BingSearch {
 	private String queryString;
 	
 	
+	/**
+	 * 
+	 * @param userSubscriptionID A valid, active Bing web search API key (v. 5.0)
+	 */
 	public BingSearch(String userSubscriptionID) {
 		this.userSubscriptionID = userSubscriptionID;
 	}
 	
-	public void runSearch() throws Exception {
+	/**
+	 * Runs a query against the Bing Web Search API.
+	 * @param queryString
+	 * @throws Exception
+	 */
+	public void runQuery(String queryString) throws Exception {
+		this.queryString = queryString;
 		checkStatus();
 		
 		URI searchURI = getSearchURI();		
@@ -57,24 +79,35 @@ public class BingSearch {
 		String line;
 	    while ((line = reader.readLine()) != null) {
 	        builder.append(line);
-	        builder.append('\r');
+	        builder.append(System.lineSeparator());
 	      }
 	    
 	    String jsonString = builder.toString();
 	    
-	    //System.out.println(jsonString);
-	    //System.exit(1);
+	    System.out.println(jsonString);
 	    
 	    JSONParser parser = new JSONParser();
 	    JSONObject jsonObject = (JSONObject) parser.parse(jsonString);
 	    JSONObject temp = (JSONObject) jsonObject.get("webPages");
 	    JSONArray jsonArray = (JSONArray) temp.get("value");
-	    Iterator<JSONObject> it = jsonArray.iterator();
+	    @SuppressWarnings("unchecked")
+		Iterator<JSONObject> it = jsonArray.iterator();
 	    while(it.hasNext()) {
 	    		jsonObject = it.next();
-	    		System.out.println(jsonObject.get("name"));
-	    		System.out.println(jsonObject.get("displayUrl"));
-	    		System.out.println(jsonObject.get("snippet") + "\n");
+	    			    		
+	    		String url = (String) jsonObject.get(BingSearch.RESULTS_FIELD_URL);
+	    		
+	    		Matcher matcher = pattern1.matcher(url);
+	    		url = matcher.replaceFirst(""); 
+	    		
+	    		matcher = pattern2.matcher(url);
+	    		url = matcher.replaceFirst(""); 
+	    		url = URLDecoder.decode(url, "UTF-8");
+	    		
+	    		System.out.println(url);
+
+	    		//System.out.println(jsonObject.get(BingSearch.RESULTS_FIELD_NAME));
+	    		//System.out.println(jsonObject.get(BingSearch.RESULTS_FIELD_SNIPPET) + System.lineSeparator());
 	    }
 	    
 	}
@@ -116,9 +149,6 @@ public class BingSearch {
 	}
 	public void setSafesearch(String safesearch) {
 		this.safesearch = safesearch;
-	}
-	public void setQueryString(String queryString) {
-		this.queryString = queryString;
 	}
 	
 	

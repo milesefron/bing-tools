@@ -14,8 +14,7 @@ public class RunSearch {
 		params.readParams();
 		
 		BingSearch search = new BingSearch(params.getParamValue(Parameters.PARAM_NAME_USER_KEY));
-		search.setQueryString(params.getParamValue(Parameters.PARAM_NAME_QUERY_TO_RUN));
-		search.runSearch();
+		search.runQuery(params.getParamValue(Parameters.PARAM_NAME_QUERY_TO_RUN));
 		
 	}
 }

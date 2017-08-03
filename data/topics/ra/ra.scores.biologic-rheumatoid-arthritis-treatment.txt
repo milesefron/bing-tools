@@ -1,0 +1,10 @@
+1 http://www.healthline.com/health/rheumatoid-arthritis/understanding-biologic-treatments-for-ra
+2 http://www.webmd.com/rheumatoid-arthritis/biologics
+2 http://www.everydayhealth.com/rheumatoid-arthritis/can-biologics-relieve-your-ra/the-facts-about-biologics-for-rheumatoid-arthritis.aspx
+0 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4440355/
+0 https://www.simponi.com/rheumatoid-arthritis/biologics
+1 http://www.arthritis.org/living-with-arthritis/treatments/medication/drug-types/biologics/drug-guide-biologics.php
+0 https://www.rheumatology.org/I-Am-A/Patient-Caregiver/Treatments
+2 https://www.healthcentral.com/article/how-do-biologics-treat-ra
+1 http://www.webmd.boots.com/arthritis/guide/biologics-rheumatoid-arthritis-treatment
+0 http://emedicine.medscape.com/article/331715-treatment

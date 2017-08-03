@@ -1,0 +1,10 @@
+2 http://www.webmd.com/rheumatoid-arthritis/guide/treatment-care-rheumatoid-arthritis
+0 http://www.medicinenet.com/rheumatoid_arthritis/article.htm
+1 http://www.mayoclinic.org/diseases-conditions/rheumatoid-arthritis/diagnosis-treatment/treatment/txc-20197400
+1 http://www.arthritis.org/about-arthritis/types/rheumatoid-arthritis/treatment.php
+1 https://www.rheumatoidarthritis.org/treatment/
+2 http://www.healthline.com/health-slideshow/remedies-rheumatoid-arthritis
+2 https://www.uptodate.com/contents/rheumatoid-arthritis-treatment-beyond-the-basics
+1 https://www.drugs.com/slideshow/drug-treatment-for-rheumatoid-arthritis-1041
+2 https://www.hopkinsarthritis.org/arthritis-info/rheumatoid-arthritis/ra-treatment/
+0 http://www.arthritisresearchuk.org/arthritis-information/conditions/rheumatoid-arthritis/treatments.aspx
