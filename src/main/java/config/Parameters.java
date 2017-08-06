@@ -21,7 +21,7 @@ public abstract class Parameters {
 	protected String pathToParamSource;
 	
 	/**
-	 * @param pathToParamFile A resolvable path to a data store containing parameter specifications
+	 * @param pathToParamSource A resolvable path to a data store containing parameter specifications
 	 */
 	public void setPathToParamSource(String pathToParamSource) {
 		this.pathToParamSource = pathToParamSource;
@@ -29,7 +29,8 @@ public abstract class Parameters {
 	
 	/**
 	 * @param paramName The identifier of a parameter whose value this method fetches
-	 * @return
+	 * @return the value associated with this parameter name.  
+	 * @throws Exception Throws an exception if client requests a non-existent parameter.
 	 */
 	public String getParamValue(String paramName) throws Exception {
 		if(params == null || !params.containsKey(paramName))
@@ -57,7 +58,7 @@ public abstract class Parameters {
 	
 	/**
 	 * Reads parameters from an externally stored resource (e.g. a formatted file)
-	 * 
+	 * @exception Exception The precise exception will depend on the implementation of the extending class.
 	 */
 	abstract public void readParams() throws Exception;
 	

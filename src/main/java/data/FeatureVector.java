@@ -11,23 +11,48 @@ import java.util.Set;
 import text.TextUtils;
 import utils.MapUtils;
 
+/**
+ * Represents text as a bag of words.  Provides methods that allow clients to
+ * alter, access, and pretty-print the data.
+ * @author Miles Efron
+ *
+ */
 public class FeatureVector {
 	private DecimalFormat decimalFormat = new DecimalFormat("#.#######");
-	
 	private Map<String,Double> vector;
+
+	private Boolean containsCountData = true;
 
 	
 	public FeatureVector() {
 		vector = new HashMap<String,Double>();
 	}
 	
+	/**
+	 * Allows us to pass in a (possibly long) text string for insertion into this vector.
+	 * This method will clean up the text in various ways (case-folding, applying a stoplist,
+	 * removing punctuation and extra whitespace, removing very short 'words').
+	 * @param text A raw string of 0 or more words
+	 */
 	public void addText(String text) {
 		List<String> terms = TextUtils.clean(text);
 		for(String term : terms)
 			addFeature(term);
 	}
 	
-	public void addFeature(String feature) {
+	/**
+	 * Adds a single feature (e.g. a word) to the vector.  This is useful if a client
+	 * needs to bypass the text cleaning in the addText method.
+	 * @param feature A feature to add to the vector.  No cleanup is done on this feature; it
+	 * will be inserted exactly as-is.  Additionally, inserting a feature via this method increases
+	 * the feature's count in the vector.
+	 */
+	public void addFeature(String feature) throws IllegalStateException {
+		// make sure we're in a state where incrementing feature counts is sensible.
+		if(!containsCountData) {
+			throw new IllegalStateException("Can't increment the count for " + feature + 
+					" in FeatureVector.addFeature because the values in the vector are not count data at this time.");
+		}
 		Double current = vector.get(feature);
 		if(current == null)
 			vector.put(feature, 1.0);
@@ -35,10 +60,23 @@ public class FeatureVector {
 			vector.put(feature, current + 1.0);
 	}
 	
+	/**
+	 * Coerces the frequency values in the vector to lie in [0,1] such that all stored values
+	 * sum to 1...in other words, this method turns the vector into a language model (i.e. a
+	 * multinomial over the indexing vocabulary).
+	 */
 	public void normalize() {
 		vector = MapUtils.normalize(vector);
+		
+		// note that we are no longer dealing with count data
+		containsCountData = false;
 	}
 	
+	/**
+	 * Provides item-level access to the values stored in the vector.
+	 * @param feature the name of a feature (e.g. a word) that we want to look up in the vector representation
+	 * @return the current stored value for this feature
+	 */
 	public double getValue(String feature) {
 		if(vector.containsKey(feature))
 			return vector.get(feature);
@@ -49,6 +87,14 @@ public class FeatureVector {
 		return vector.keySet();
 	}
 	
+	/**
+	 * Truncates the vector so that it contains at most k entries.
+	 * N.B. This method is relatively expensive.  It involves sorting
+	 * all of the vector's key-value pairs and copying the largest k of
+	 * them into a brand-new data structure.
+	 * 
+	 * @param k the maximum number of values to retain in this vector.  
+	 */
 	public void clip(int k) {
 		List<Tuple> tuples = getOrderedTuples();
 		vector.clear();
@@ -71,19 +117,11 @@ public class FeatureVector {
 		return builder.toString();
 	}
 	
-	private List<Tuple> getOrderedTuples() {
-		List<Tuple> tuples = new LinkedList<Tuple>();
-		for(String feature : vector.keySet()) {
-			Tuple tuple = new Tuple(feature, vector.get(feature));
-			tuples.add(tuple);
-		}
-		
-		Collections.sort(tuples, new TupleComparator());
-		
-		return tuples;
-	}
-	
-	
+
+	/**
+	 * Calculates the L2 norm of this vector (i.e. the vector length).
+	 * @return The length of vector expressed in L2 terms.
+	 */
 	public double l2norm() {
 		double norm = 0.0;
 		for(String feature : vector.keySet())
@@ -91,6 +129,14 @@ public class FeatureVector {
 		return Math.sqrt(norm);
 	}
 	
+	/** 
+	 * Static method to take the cosine of the angle between two vectors, x and y.
+	 * N.B. This operation is symmetrical, so FeatureVector.cosine(x,y) = FeatureVector.cosine(y,x).
+	 * 
+	 * @param x an object of class FeatureVector
+	 * @param y an object of class FeatureVector
+	 * @return the cosine of the angle between x and y
+	 */
 	public static double cosine(FeatureVector x, FeatureVector y) {
 		double xnorm = x.l2norm();
 		double ynorm = y.l2norm();
@@ -103,5 +149,18 @@ public class FeatureVector {
 			dotproduct += x.getValue(feature) * y.getValue(feature);
 		
 		return dotproduct / (xnorm * ynorm);
+	}
+	
+	
+	private List<Tuple> getOrderedTuples() {
+		List<Tuple> tuples = new LinkedList<Tuple>();
+		for(String feature : vector.keySet()) {
+			Tuple tuple = new Tuple(feature, vector.get(feature));
+			tuples.add(tuple);
+		}
+		
+		Collections.sort(tuples, new TupleComparator());
+		
+		return tuples;
 	}
 }
