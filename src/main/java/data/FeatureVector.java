@@ -3,11 +3,13 @@ package data;
 import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import text.Stopper;
 import text.TextUtils;
 import utils.MapUtils;
 
@@ -20,10 +22,18 @@ import utils.MapUtils;
 public class FeatureVector {
 	private DecimalFormat decimalFormat = new DecimalFormat("#.#######");
 	private Map<String,Double> vector;
-
+	private Stopper stopper = null;
+	
+	/**
+	 * Only used if we are dealing with named documents.  This field stores the title of the 
+	 * document we are representing.
+	 */
+	private String textTitle;
+	
 	private Boolean containsCountData = true;
 
 	
+
 	public FeatureVector() {
 		vector = new HashMap<String,Double>();
 	}
@@ -35,7 +45,7 @@ public class FeatureVector {
 	 * @param text A raw string of 0 or more words
 	 */
 	public void addText(String text) {
-		List<String> terms = TextUtils.clean(text);
+		List<String> terms = TextUtils.clean(text, stopper);
 		for(String term : terms)
 			addFeature(term);
 	}
@@ -59,6 +69,11 @@ public class FeatureVector {
 		else
 			vector.put(feature, current + 1.0);
 	}
+	
+	public void setFeatureValue(String feature, Double value) {
+		vector.put(feature, value);
+	}
+	
 	
 	/**
 	 * Coerces the frequency values in the vector to lie in [0,1] such that all stored values
@@ -86,6 +101,14 @@ public class FeatureVector {
 	public Set<String> getFeatures() {
 		return vector.keySet();
 	}
+	
+	public int getFeatureCount() {
+		if(vector == null)
+			return 0;
+		return vector.size();
+	}
+	
+	
 	
 	/**
 	 * Truncates the vector so that it contains at most k entries.
@@ -129,6 +152,10 @@ public class FeatureVector {
 		return Math.sqrt(norm);
 	}
 	
+	public void setStopper(Stopper stopper) {
+		this.stopper = stopper;
+	}
+	
 	/** 
 	 * Static method to take the cosine of the angle between two vectors, x and y.
 	 * N.B. This operation is symmetrical, so FeatureVector.cosine(x,y) = FeatureVector.cosine(y,x).
@@ -141,7 +168,8 @@ public class FeatureVector {
 		double xnorm = x.l2norm();
 		double ynorm = y.l2norm();
 		
-		Set<String> vocab = x.getFeatures();
+		Set<String> vocab = new HashSet<String>();
+		vocab.addAll(x.getFeatures());
 		vocab.addAll(y.getFeatures());
 		
 		double dotproduct = 0.0;
@@ -151,6 +179,12 @@ public class FeatureVector {
 		return dotproduct / (xnorm * ynorm);
 	}
 	
+	public String getTitle() {
+		return textTitle;
+	}
+	public void setTitle(String textTitle) {
+		this.textTitle = textTitle;
+	}
 	
 	private List<Tuple> getOrderedTuples() {
 		List<Tuple> tuples = new LinkedList<Tuple>();
@@ -162,5 +196,24 @@ public class FeatureVector {
 		Collections.sort(tuples, new TupleComparator());
 		
 		return tuples;
+	}
+	
+	public static boolean equalData(FeatureVector x, FeatureVector y) {
+		if(x.getFeatureCount() != y.getFeatureCount())
+			return false;
+		if(!x.getTitle().equals(y.getTitle()))
+			return false;
+		
+		Set<String> vocab = new HashSet<String>();
+		vocab.addAll(x.getFeatures());
+		vocab.addAll(y.getFeatures());
+		//System.out.println(vocab);
+		for(String feature : vocab) {
+			//System.out.println(feature + "\t\t" + x.getValue(feature) + "\t" + y.getValue(feature));
+			if(x.getValue(feature) != y.getValue(feature))
+				return false;
+		}
+		
+		return true;
 	}
 }

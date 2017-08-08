@@ -1,16 +1,20 @@
 package main;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Iterator;
+import java.io.FileWriter;
+import java.io.OutputStreamWriter;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
-import bing.BingSearch;
+import bing.JsonToSearchHits;
+import data.Csv;
 import data.FeatureVector;
+import data.SearchHit;
+import text.Stopper;
+import text.StopperBasic;
 
 /** 
  * This demo program reads in the results of Bing searches that have been stored in one or more
@@ -26,27 +30,38 @@ import data.FeatureVector;
  * @author Miles Efron
  *
  */
-public class RunSerpToFeatureVector {
+public class RunSerpsToCsv {
 	public static final String FILE_EXTENSION = "json";
-	
-	private static final int VECTOR_MAX_SIZE = 20;
-	
+		
 	/**
 	 * 
 	 * @param args args[0] should contain a resolveable path to a *directory* containing one or
-	 * more JSON files returned by the Bing search API.
+	 * more JSON files returned by the Bing search API.  If args[1] is not specified, output goes
+	 * to STDOUT.  If args[1] <em>is</em> specified, output is directed to the filename specified by
+	 * args[1].
 	 * @throws Exception This may be encountered if the supplied directory is bogus.  It will NOT be thrown if
 	 * the program finds a wrongly-encoded search result file (problems with JSON encoding simply lead to a file
 	 * getting skipped).
 	 */
 	public static void main(String[] args) throws Exception {
-		String path = args[0];
-
-		File dir = new File(path);
+		String pathToInputData = args[0];		
+		File dir = new File(pathToInputData);
 		File[] files = dir.listFiles();
 
-		FeatureVector vector = new FeatureVector();
-
+		Stopper stopper = new StopperBasic();
+		
+		String pathToOutFile = null;
+		if(args.length > 1)
+			pathToOutFile = args[1];
+		
+		List<FeatureVector> vectors = new LinkedList<FeatureVector>();
+		
+		
+		BufferedWriter writer;
+		if(pathToOutFile != null)
+			writer = new BufferedWriter(new FileWriter(pathToOutFile));
+		else writer = new BufferedWriter(new OutputStreamWriter(System.out));
+		
 		for(File file : files) {
 
 			Scanner in = new Scanner(new FileInputStream(file));
@@ -55,25 +70,27 @@ public class RunSerpToFeatureVector {
 
 			// throw an exception and then move along if we encounter a file that isn't a JSON-encoded SERP object.
 			try {
-				JSONParser parser = new JSONParser();
-				JSONObject jsonObject = (JSONObject) parser.parse(json);
+				List<SearchHit> hits = JsonToSearchHits.toSearchHits(json);
 				System.err.println("parsed " + file);
-				JSONObject temp = (JSONObject) jsonObject.get(BingSearch.API_JSON_KEY_1);
-				JSONArray jsonArray = (JSONArray) temp.get(BingSearch.API_JSON_KEY_2);
-				@SuppressWarnings("unchecked")
-				Iterator<JSONObject> it = jsonArray.iterator();
-				while(it.hasNext()) {
-					jsonObject = it.next();
-					vector.addText((String)jsonObject.get(BingSearch.RESULTS_FIELD_NAME));
-					vector.addText((String)jsonObject.get(BingSearch.RESULTS_FIELD_URL));
-					vector.addText((String)jsonObject.get(BingSearch.RESULTS_FIELD_URL));
+				for(SearchHit hit : hits) {
+					FeatureVector vector = new FeatureVector();
+					vector.setStopper(stopper);
+					
+					vector.addText(hit.getUrl());
+					vector.addText(hit.getTitle());
+					vector.addText(hit.getSnippet());
+					
+					vector.setTitle(hit.getUrl());
+					
+					vectors.add(vector);
 				}
 			} catch(Exception e) {
 				System.err.println("skipped non-JSON file " + file);
 			}
 		}
 
-		vector.clip(RunSerpToFeatureVector.VECTOR_MAX_SIZE);
-		System.out.println(vector);
+		Csv.writeCsv(vectors, writer);
+		
+		
 	}
 }

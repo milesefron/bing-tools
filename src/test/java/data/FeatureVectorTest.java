@@ -18,6 +18,9 @@ public class FeatureVectorTest {
 	public void tearDown() throws Exception {
 	}
 
+	/**
+	 * Assures we never have a null object in a vector
+	 */
 	@Test
 	public void constructorInitializesVector() {
 		vector = new FeatureVector();
@@ -27,6 +30,9 @@ public class FeatureVectorTest {
 		assertEquals(vector.getFeatureCount(), 1);
 	}
 
+	/**
+	 * Validates count incrementation
+	 */
 	@Test
 	public void addFeatureIncrements() {
 		String feature1 = "feature1";
@@ -38,11 +44,11 @@ public class FeatureVectorTest {
 		vector.addFeature(feature1);
 		assertEquals((int)vector.getValue(feature1), 2);
 		vector.addFeature(feature2);
-		assertEquals((int)vector.getValue(feature1), 2);
+		assertEquals((int)vector.getValue(feature2), 1);
 	}
 	
 	@Test
-	public void addTextRemovesPunctuation() {
+	public void addTextInvokesCleaning() {
 		vector = new FeatureVector();
 		vector.addText(text);
 		
@@ -61,5 +67,41 @@ public class FeatureVectorTest {
 		 */
 		assertEquals((int)vector.getValue("this"),  0);
 
+		/**
+		 * ignore short words
+		 */
+		assertEquals((int)vector.getValue("xz"), 0);
+	}
+	
+	/**
+	 * Assures that we can't increment a feature's count once we normalize the vector
+	 */
+	@Test(expected = Exception.class)
+	public void doNotIncrementProbabilities() {
+		vector = new FeatureVector();
+		vector.addText(text);
+		assertTrue(vector.getFeatureCount() > 0);
+		
+		vector.normalize();
+		
+		/**
+		 * this should throw an exception
+		 */
+		vector.addFeature("feature");
+	}
+	
+	/**
+	 * Sanity checks for the {@link data.FeatureVector#cosine(FeatureVector, FeatureVector)} method
+	 */
+	@Test
+	public void cosine01() {
+		FeatureVector x = new FeatureVector();
+		x.addText("axa ono ici");
+		
+		FeatureVector y = new FeatureVector();
+		y.addText("zyz vwv utu");
+		
+		assertEquals(Math.round(FeatureVector.cosine(x, y)), 0);
+		assertEquals(Math.round(FeatureVector.cosine(x, x)), 1);
 	}
 }

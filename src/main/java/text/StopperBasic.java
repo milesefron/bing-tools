@@ -10,7 +10,7 @@ public class StopperBasic extends Stopper {
 		stoplist = new HashSet<String>(
 				Arrays.asList(
 						"a", "about", "also", "am", "an", "and", "another", "are", "as", "at", 
-						"be", "been", 
+						"be", "been", "bing", 
 						"can", "com", "could",
 						"did", "do",
 						"en", 

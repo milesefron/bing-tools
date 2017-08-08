@@ -24,8 +24,8 @@ public class ParametersTabImpl extends Parameters {
 		while(in.hasNextLine()) {
 			String line = in.nextLine();
 			String[] fields = line.split(ParametersTabImpl.DELIMITER);
-			if(fields.length > (ParametersTabImpl.INDEX_OF_PARAM_VALS + 1))
-				throw new Exception ("Too many fields in parameter specification: " + line);
+			if(fields.length != (ParametersTabImpl.INDEX_OF_PARAM_VALS + 1))
+				throw new Exception ("Wrong number of fields in parameter file: " + line);
 			setParamValue(fields[ParametersTabImpl.INDEX_OF_PARAM_NAMES], fields[ParametersTabImpl.INDEX_OF_PARAM_VALS]);
 		}
 		in.close();

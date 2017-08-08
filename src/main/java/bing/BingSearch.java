@@ -10,13 +10,24 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Iterator;
-import java.util.regex.Matcher;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import data.SearchHit;
+
+/**
+ * Provides access to functionality delivered by v5.0 of the Bing Web Search API.
+ * The official Microsoft documentation on the API is available at:
+ * https://docs.microsoft.com/en-us/azure/cognitive-services/bing-web-search/search-the-web
+ * 
+ * @author Miles Efron
+ *
+ */
 public class BingSearch {
 
 	/**
@@ -43,6 +54,11 @@ public class BingSearch {
 	 * how many results to retrieve (max)
 	 */
 	public static final String API_COUNT_ARG = "count";
+	
+	/**
+	 * starting index of the hits we want (for paging through results)
+	 */
+	public static final String API_OFFSET_ARG = "offset";
 	
 	/**
 	 * the 'market' argument to the API call
@@ -89,12 +105,20 @@ public class BingSearch {
 	 */
 	public static final String REGEX_URL2 = "&p=.*";
 
-	private Pattern pattern1 = Pattern.compile(BingSearch.REGEX_URL1);
-	private Pattern pattern2 = Pattern.compile(BingSearch.REGEX_URL2);
+	/**
+	 * Pattern used to clean up URLs
+	 */
+	public static final Pattern URL_PATTERN1 = Pattern.compile(BingSearch.REGEX_URL1);
+	
+	/**
+	 * Pattern used to clean up URLs
+	 */
+	public static final Pattern URL_PATTERN2 = Pattern.compile(BingSearch.REGEX_URL2);
 	
 	private String userSubscriptionID;
 	
 	private int resultCount = 10;
+	private int offset = 0;
 	private String market = "en-us";
 	private String safesearch = "Off";
 	
@@ -110,11 +134,67 @@ public class BingSearch {
 	}
 	
 	/**
-	 * Runs a query against the Bing Web Search API.
-	 * @param queryString a keyword query
-	 * @throws Exception in case of network/file interruptions
+	 * Runs a query and fetches the results as a JSON String
+	 * @param queryString The keyword query we're going to run
+	 * @return Search results encoded as a JSON object in the MS-defined format returned by the API endpoint
+	 * @throws Exception Network or formatting problems.
 	 */
-	public void runQuery(String queryString) throws Exception {
+	public String runQueryToJson(String queryString) throws Exception {
+		String json = runQuery(queryString);
+		return json;
+	}
+	
+	/**
+	 * Runs a query and fetches the results as a List of {@link data.SearchHit} objects.
+	 * @param queryString The keyword query we're going to run
+	 * @return A Java {@link java.util.List} object of {@link data.SearchHit}s containing the search results
+	 * @throws Exception Network or formatting problems.
+	 */
+	public List<SearchHit> runQueryToSearchHits(String queryString) throws Exception {
+		String json = runQuery(queryString);
+		
+		List<SearchHit> hits = new LinkedList<SearchHit>();
+		
+		// used to generate placeholder document scores
+		int rank = 1;
+
+		JSONParser parser = new JSONParser();
+		JSONObject jsonObject = (JSONObject) parser.parse(json);
+		JSONObject temp = (JSONObject) jsonObject.get(BingSearch.API_JSON_KEY_1);
+		JSONArray jsonArray = (JSONArray) temp.get(BingSearch.API_JSON_KEY_2);
+		@SuppressWarnings("unchecked")
+		Iterator<JSONObject> it = jsonArray.iterator();
+		while(it.hasNext()) {
+			SearchHit hit = new SearchHit();
+			
+			// use a made-up score for now
+			hit.setScore(1.0 / rank++);
+			
+			jsonObject = it.next();
+			hit.setTitle((String)jsonObject.get(BingSearch.RESULTS_FIELD_NAME));
+			hit.addTextToVector(hit.getTitle());
+			String url = (String)jsonObject.get(BingSearch.RESULTS_FIELD_URL);
+			url = url.replaceFirst(BingSearch.REGEX_URL1, "");
+			url = url.replaceAll(BingSearch.REGEX_URL2, "");
+			url = URLDecoder.decode(url, "UTF-8");
+			hit.setUrl(url);
+			hit.addTextToVector(hit.getUrl());
+			
+			hit.setSnippet((String)jsonObject.get(BingSearch.RESULTS_FIELD_SNIPPET));
+			hit.addTextToVector(hit.getSnippet());
+			
+			hits.add(hit);
+		}
+
+		
+		return hits;
+	}
+	
+	
+	
+	
+
+	private String runQuery(String queryString) throws Exception {
 		this.queryString = queryString;
 		checkStatus();
 		
@@ -137,43 +217,20 @@ public class BingSearch {
 	    
 	    String jsonString = builder.toString();
 	    
-	    System.out.println(jsonString);
 	    
-	    JSONParser parser = new JSONParser();
-	    JSONObject jsonObject = (JSONObject) parser.parse(jsonString);
-	    JSONObject temp = (JSONObject) jsonObject.get("webPages");
-	    JSONArray jsonArray = (JSONArray) temp.get("value");
-	    @SuppressWarnings("unchecked")
-		Iterator<JSONObject> it = jsonArray.iterator();
-	    while(it.hasNext()) {
-	    		jsonObject = it.next();
-	    			    		
-	    		String url = (String) jsonObject.get(BingSearch.RESULTS_FIELD_URL);
-	    		
-	    		Matcher matcher = pattern1.matcher(url);
-	    		url = matcher.replaceFirst(""); 
-	    		
-	    		matcher = pattern2.matcher(url);
-	    		url = matcher.replaceFirst(""); 
-	    		url = URLDecoder.decode(url, "UTF-8");
-	    		
-	    		System.out.println(url);
-
-	    		//System.out.println(jsonObject.get(BingSearch.RESULTS_FIELD_NAME));
-	    		//System.out.println(jsonObject.get(BingSearch.RESULTS_FIELD_SNIPPET) + System.lineSeparator());
-	    }
-	    
+	    return jsonString;
 	}
 	
 	private URI getSearchURI() {
 		URI uri = null;
 		try {
-			uri = URI.create(API_HOST + 
-					             API_PATH + 
-					             API_COUNT_ARG + "=" + resultCount + "&" +
-					             API_MKT_ARG   + "=" + market + "&" +
-					             API_SAFE_ARG  + "=" + safesearch + "&" + 
-					             API_QUERY_ARG + "=" + URLEncoder.encode(queryString, "UTF-8"));
+			uri = URI.create(BingSearch.API_HOST + 
+								BingSearch.API_PATH + 
+								BingSearch.API_COUNT_ARG  + "=" + resultCount + "&" +
+								BingSearch.API_OFFSET_ARG + "=" + offset + "&" + 
+								BingSearch.API_MKT_ARG    + "=" + market + "&" +
+								BingSearch.API_SAFE_ARG   + "=" + safesearch + "&" + 
+								BingSearch.API_QUERY_ARG  + "=" + URLEncoder.encode(queryString, "UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -183,7 +240,7 @@ public class BingSearch {
 	
 	private void checkStatus() throws Exception {
 		if(userSubscriptionID == null) {
-		   String message = "Trouble with API credentials." + "\n" +
+		   String message = "Trouble with API credentials." + System.lineSeparator() +
 							"userSubscriptionID: " + userSubscriptionID;		
 			throw new Exception(message);
 		}	
@@ -196,6 +253,9 @@ public class BingSearch {
 	}
 	public void setResultCount(int resultCount) {
 		this.resultCount = resultCount;
+	}
+	public void setOffset(int offset) {
+		this.offset = offset;
 	}
 	public void setMarket(String market) {
 		this.market = market;

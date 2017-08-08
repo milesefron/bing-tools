@@ -3,4 +3,4 @@
 .settings
 .classpath
 target
-config
+config/bing_config.txt

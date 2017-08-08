@@ -32,12 +32,8 @@ public class TextUtils {
 	/**
 	 * if we are enforcing minimum word length, all words shorter than this will be ignored
 	 */
-	private static final int MIN_WORD_LENGTH = 2;
+	private static final int MIN_WORD_LENGTH = 3;
 	
-	/**
-	 * an object of type {@link text.Stopper} for removing undesireable words
-	 */
-	private static final Stopper STOPPER = new StopperBasic();
 	
 	
 	private static Pattern cleaningRegex = Pattern.compile(TextUtils.TEXT_CLEANING_REGEX);
@@ -58,14 +54,15 @@ public class TextUtils {
 	 * @param input A String to clean
 	 * @return cleaned version of the input.
 	 */
-	public static List<String> clean(String input) {		
+	public static List<String> clean(String input, Stopper stopper) {		
 		String lc = input.toLowerCase();
 		Matcher matcher = cleaningRegex.matcher(lc);
 		lc = matcher.replaceAll(TextUtils.TOKEN_SEPARATOR);
 		List<String> tokens = tokenize(lc);
 		if(TextUtils.enforceMinWordLength)
 			tokens = TextUtils.enforceWordLength(tokens);
-		tokens = TextUtils.stoplist(tokens);
+		if(stopper != null)
+			tokens = TextUtils.stoplist(tokens, stopper);
 		return tokens;
 	}
 	
@@ -77,6 +74,7 @@ public class TextUtils {
 		TextUtils.enforceMinWordLength = enforceWordLength;
 	}
 	
+	
 	/**
 	 * Splits a string on whitespace.
 	 * @param input A string to tokenize
@@ -87,10 +85,10 @@ public class TextUtils {
 		return Arrays.asList(toks);
 	}
 	
-	private static List<String> stoplist(Collection<String> input) {
+	private static List<String> stoplist(Collection<String> input, Stopper stopper) {		
 		List<String> stopped = new LinkedList<String>();
 		for(String term : input)
-			if(!STOPPER.contains(term))
+			if(!stopper.contains(term))
 				stopped.add(term);
 		return stopped;
 	}

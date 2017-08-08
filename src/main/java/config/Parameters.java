@@ -16,6 +16,9 @@ import java.util.Map;
 public abstract class Parameters {
 	public static final String PARAM_NAME_USER_KEY = "key";
 	public static final String PARAM_NAME_QUERY_TO_RUN = "query";
+	public static final String PARAM_NAME_COUNT = "count";
+	public static final String PARAM_NAME_OFFSET = "offset";
+	public static final String PARAM_NAME_STOPPER = "stopper";
 	
 	protected Map<String,String> params;
 	protected String pathToParamSource;
@@ -34,7 +37,7 @@ public abstract class Parameters {
 	 */
 	public String getParamValue(String paramName) throws Exception {
 		if(params == null || !params.containsKey(paramName))
-			throw new Exception("NO PARAMETER FOUND WITH NAME: " + paramName);
+			throw new Exception("Cannot find requested parameter: " + paramName);
 		return params.get(paramName);
 	}
 	
@@ -46,7 +49,6 @@ public abstract class Parameters {
 	public void setParamValue(String paramName, String paramValue) {
 		if(params == null)
 			params = new HashMap<String,String>();
-		
 		params.put(paramName, paramValue);
 	}
 	
