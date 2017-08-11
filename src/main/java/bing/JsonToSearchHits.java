@@ -15,7 +15,7 @@ import data.SearchHit;
 
 /**
  * Translates search results stored in a JSON object as returned by the Bing API into
- * a (@link java.util.List} of {@data SearchHit} objects.
+ * a (@link java.util.List} of {link data.SearchHit} objects.
  * 
  * @author Miles Efron
  *

@@ -17,10 +17,18 @@ public class SearchHit {
 		vector = new FeatureVector();
 	}
 	
+	/** 
+	 * Adds zero or more words to this {@link data.SearchHit}'s {@link data.FeatureVector}.
+	 * @param text zero or more words to be added to this object's feature vector.
+	 */
 	public void addTextToVector(String text) {
 		vector.addText(text);
 	}
 	
+	/**
+	 * Provides access to a vector representation of all the text associated with this search hit.
+	 * @return An object of type {@link data.FeatureVector}, containing the URL, snippet and title text from this hit.
+	 */
 	public FeatureVector getTextVector() {
 		return vector;
 	}
@@ -49,6 +57,12 @@ public class SearchHit {
 		this.snippet = snippet;
 	}
 
+	/**
+	 * Returns the query-document similarity score for this Search Hit.  If we're not re-scoring our
+	 * documents, search hits obtained from the Bing API have no value for this field.  Unless you
+	 * specifically set a search hit's score, its score value==0;
+	 * @return A query-document similarity score.
+	 */
 	public double getScore() {
 		return score;
 	}
@@ -57,6 +71,7 @@ public class SearchHit {
 		this.score = score;
 	}
 	
+	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append(score   + System.lineSeparator());

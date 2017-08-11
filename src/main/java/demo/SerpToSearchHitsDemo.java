@@ -1,4 +1,4 @@
-package main;
+package demo;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,7 +25,7 @@ import data.SearchHitComparator;
  * @author Miles Efron
  *
  */
-public class RunSerpToSearchHits {
+public class SerpToSearchHitsDemo {
 
 
 	/**

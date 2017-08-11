@@ -1,4 +1,4 @@
-package main;
+package demo;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -30,7 +30,7 @@ import text.StopperBasic;
  * @author Miles Efron
  *
  */
-public class RunSerpsToCsv {
+public class SerpsToCsvDemo {
 	public static final String FILE_EXTENSION = "json";
 		
 	/**

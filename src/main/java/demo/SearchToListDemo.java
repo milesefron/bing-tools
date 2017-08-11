@@ -1,27 +1,24 @@
-package main;
+package demo;
 
+import java.util.Collections;
 import java.util.List;
 
 import bing.BingSearch;
-import bing.JsonToSearchHits;
 import config.Parameters;
 import config.ParametersTabImpl;
 import data.SearchHit;
+import data.SearchHitComparator;
 
 /**
- * Demo class that runs a query against the Bing API.  The class prints the raw JSON returned
- * by the API call and cleaned-up versions of the ranked URLs.
+ * Demo class that runs a query against the Bing API.  The class retrieves the results as a
+ * {@link java.util.List} containing one {@link data.SearchHit} per result.
  * 
  * @author Miles Efron
  *
  */
-public class RunSearchToJson {
+public class SearchToListDemo {
 
-	/**
-	 * 
-	 * @param args A resolvable path to a parameter file formatted for {@link config.ParametersTabImpl}
-	 * @throws Exception If the parameter file is ill-formed
-	 */
+	
 	public static void main(String[] args) throws Exception {
 		String pathToParams = args[0];
 		ParametersTabImpl params = new ParametersTabImpl();
@@ -31,12 +28,11 @@ public class RunSearchToJson {
 		BingSearch search = new BingSearch(params.getParamValue(Parameters.PARAM_NAME_USER_KEY));
 		search.setResultCount(Integer.parseInt(params.getParamValue(Parameters.PARAM_NAME_COUNT)));
 		search.setOffset(Integer.parseInt(params.getParamValue(Parameters.PARAM_NAME_OFFSET)));
-		String json = search.runQueryToJson(params.getParamValue(Parameters.PARAM_NAME_QUERY_TO_RUN));
+		List<SearchHit> hits = search.runQueryToSearchHits(params.getParamValue(Parameters.PARAM_NAME_QUERY_TO_RUN));
 		
-		System.out.println(json);
-		
-	    List<SearchHit> hits = JsonToSearchHits.toSearchHits(json);
-	    for(SearchHit hit : hits)
-	    		System.out.println(hit.getUrl());
+		// technically we don't need to sort these since they are given to us in order...this line
+		// is here simply to show how clients can sort SearchHits if they get re-scored.
+		Collections.sort(hits, new SearchHitComparator());
+		System.out.println(hits);
 	}
 }

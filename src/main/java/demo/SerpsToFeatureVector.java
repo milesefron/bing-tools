@@ -1,4 +1,4 @@
-package main;
+package demo;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,7 +34,7 @@ import text.StopperFile;
  * @author Miles Efron
  *
  */
-public class RunSerpsToFeatureVector {
+public class SerpsToFeatureVector {
 	public static final String FILE_EXTENSION = "json";
 
 	private static final int VECTOR_MAX_SIZE = 20;
@@ -89,7 +89,7 @@ public class RunSerpsToFeatureVector {
 			}
 		}
 
-		vector.clip(RunSerpsToFeatureVector.VECTOR_MAX_SIZE);
+		vector.clip(SerpsToFeatureVector.VECTOR_MAX_SIZE);
 		System.out.println(vector);
 	}
 }

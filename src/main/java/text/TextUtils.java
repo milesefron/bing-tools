@@ -52,6 +52,7 @@ public class TextUtils {
 	 *        {@link text.TextUtils#WHITESPACE_REGEX} for exactly what is removed)</li>
 	 * </ol>
 	 * @param input A String to clean
+	 * @param stopper An object of type {@link text.Stopper}.  If stopper==null, no stoplisting is applied.
 	 * @return cleaned version of the input.
 	 */
 	public static List<String> clean(String input, Stopper stopper) {		
