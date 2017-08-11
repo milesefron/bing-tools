@@ -17,30 +17,29 @@ public class TextUtils {
 	/**
 	 * regex used to remove punctuation from text
 	 */
-	private static final String TEXT_CLEANING_REGEX = "[®:\\(\\)\\-\\—\\/\\.,!\\?'\"]";
+	public static final String TEXT_CLEANING_REGEX = "[®:\\(\\)\\-\\—\\/\\.,!\\?'\"]";
 	
 	/**
 	 * regex used to remove extra whitespace from text
 	 */
-	private static final String WHITESPACE_REGEX   = "\\s";
+	public static final String WHITESPACE_REGEX   = "\\s+";
 	
 	/**
 	 * character string denoting what separates individual tokens (i.e. a single space)
 	 */
-	private static final String TOKEN_SEPARATOR = " ";
+	public static final String TOKEN_SEPARATOR = " ";
 	
 	/**
 	 * if we are enforcing minimum word length, all words shorter than this will be ignored
 	 */
-	private static final int MIN_WORD_LENGTH = 3;
+	public static final int MIN_WORD_LENGTH = 3;
 	
+	public static boolean enforceMinWordLength = true;
 	
 	
 	private static Pattern cleaningRegex = Pattern.compile(TextUtils.TEXT_CLEANING_REGEX);
 	private static Pattern whitespaceRegex = Pattern.compile(TextUtils.WHITESPACE_REGEX);
-	
-	private static boolean enforceMinWordLength = true;
-	
+		
 	
 	/**
 	 * One-stop shopping for cleaning and tokenizing a string.  Specifically, this method
@@ -55,7 +54,7 @@ public class TextUtils {
 	 * @param stopper An object of type {@link text.Stopper}.  If stopper==null, no stoplisting is applied.
 	 * @return cleaned version of the input.
 	 */
-	public static List<String> clean(String input, Stopper stopper) {		
+	public static List<String> clean(String input, Stopper stopper) {	
 		String lc = input.toLowerCase();
 		Matcher matcher = cleaningRegex.matcher(lc);
 		lc = matcher.replaceAll(TextUtils.TOKEN_SEPARATOR);
@@ -67,13 +66,6 @@ public class TextUtils {
 		return tokens;
 	}
 	
-	/**
-	 * Should we insist that all stored words are at least {@link TextUtils#MIN_WORD_LENGTH} characters long?
-	 * @param enforceWordLength true leads us to ignore any words that are not at least {@link text.TextUtils#MIN_WORD_LENGTH} chars.
-	 */
-	public void setEnforceWordLength(boolean enforceWordLength) {
-		TextUtils.enforceMinWordLength = enforceWordLength;
-	}
 	
 	
 	/**
@@ -86,10 +78,10 @@ public class TextUtils {
 		return Arrays.asList(toks);
 	}
 	
-	private static List<String> stoplist(Collection<String> input, Stopper stopper) {		
+	private static List<String> stoplist(Collection<String> input, Stopper stopper) {	
 		List<String> stopped = new LinkedList<String>();
 		for(String term : input)
-			if(!stopper.contains(term))
+			if(!stopper.contains(term)) 
 				stopped.add(term);
 		return stopped;
 	}

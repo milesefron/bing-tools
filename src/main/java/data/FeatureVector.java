@@ -32,6 +32,8 @@ public class FeatureVector {
 	
 	private Boolean containsCountData = true;
 
+	private boolean enforceMinWordLength = true;
+	
 	
 
 	public FeatureVector() {
@@ -185,18 +187,10 @@ public class FeatureVector {
 	public void setTitle(String textTitle) {
 		this.textTitle = textTitle;
 	}
-	
-	private List<Tuple> getOrderedTuples() {
-		List<Tuple> tuples = new LinkedList<Tuple>();
-		for(String feature : vector.keySet()) {
-			Tuple tuple = new Tuple(feature, vector.get(feature));
-			tuples.add(tuple);
-		}
-		
-		Collections.sort(tuples, new TupleComparator());
-		
-		return tuples;
+	public void setEnforceMinWordLength(boolean enforceMinWordLength) {
+		this.enforceMinWordLength = enforceMinWordLength;
 	}
+
 	
 	public static boolean equalData(FeatureVector x, FeatureVector y) {
 		if(x.getFeatureCount() != y.getFeatureCount())
@@ -215,5 +209,17 @@ public class FeatureVector {
 		}
 		
 		return true;
+	}
+	
+	private List<Tuple> getOrderedTuples() {
+		List<Tuple> tuples = new LinkedList<Tuple>();
+		for(String feature : vector.keySet()) {
+			Tuple tuple = new Tuple(feature, vector.get(feature));
+			tuples.add(tuple);
+		}
+		
+		Collections.sort(tuples, new TupleComparator());
+		
+		return tuples;
 	}
 }
