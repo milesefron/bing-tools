@@ -1,6 +1,6 @@
 # bing-tools
 
-A simple set of tools for running searches using the Bing Web Search API and manipulating the resulting data.
+A simple set of tools for running searches using the Bing Web Search API and manipulating the resulting data. Part of the goal in designing these tools was minimizing the number of third-party libraries needed to make use of the Bing API.  To build and run, this library only relies on Google's `json-simple`, with `JUnit` required to build and run the tests.
 
 This repo contains client code for interacting with the Bing web search API (v5.0). In addition to running queries, paging through results, etc., the code supports manipulation of search result data in a few ways.
 
