@@ -43,8 +43,7 @@ public class SearchToJsonDemo {
 		System.out.println(json);
 		
 		// grab the URLs of our retrieved documents.
-		Stopper stopper = new StopperBasic();
-	    List<SearchHit> hits = JsonToSearchHits.toSearchHits(json, stopper);
+	    List<SearchHit> hits = JsonToSearchHits.toSearchHits(json);
 	    for(SearchHit hit : hits)
 	    		System.out.println(hit.getUrl());
 	}

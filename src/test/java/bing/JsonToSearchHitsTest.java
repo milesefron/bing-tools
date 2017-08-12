@@ -1,6 +1,6 @@
 package bing;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,8 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import data.SearchHit;
-import text.Stopper;
-import text.StopperBasic;
 
 public class JsonToSearchHitsTest {
 	/**
@@ -39,10 +37,9 @@ public class JsonToSearchHitsTest {
 		Scanner in = new Scanner(new FileInputStream(new File(JsonToSearchHitsTest.PATH_TO_JSON_FILE)));
 		String json = in.nextLine();
 		in.close();
-		Stopper stopper = new StopperBasic();
 
 		try {
-			List<SearchHit> hits = JsonToSearchHits.toSearchHits(json, stopper);
+			List<SearchHit> hits = JsonToSearchHits.toSearchHits(json);
 			assertEquals(JsonToSearchHitsTest.HIT_COUNT_IN_FILE, hits.size());
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -55,8 +52,7 @@ public class JsonToSearchHitsTest {
 	@Test(expected = ParseException.class)
 	public void invalidJsonThrowsParseException() throws UnsupportedEncodingException, ParseException {
 		String bogusJson = "this is not JSON.";
-		Stopper stopper = new StopperBasic();
-		JsonToSearchHits.toSearchHits(bogusJson, stopper);
+		JsonToSearchHits.toSearchHits(bogusJson);
 		
 	}
 

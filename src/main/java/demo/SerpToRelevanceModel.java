@@ -42,13 +42,13 @@ public class SerpToRelevanceModel {
 		in.close();
 
 		// convert the JSON to a List of SearchHits.
-		Stopper stopper = new StopperBasic();
-		hits = JsonToSearchHits.toSearchHits(json, stopper);
+		hits = JsonToSearchHits.toSearchHits(json);
 
-		
+		Stopper stopper = new StopperBasic();
+
         RelevanceModel rmObject = new RelevanceModel();
         rmObject.setExponentialRateParam(1.0);
-        FeatureVector rm1 = rmObject.getModel(hits);
+        FeatureVector rm1 = rmObject.getModel(hits, stopper);
         rm1.clip(50);
         System.out.println(rm1);
 

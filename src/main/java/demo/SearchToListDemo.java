@@ -30,12 +30,11 @@ public class SearchToListDemo {
 		params.readParams();
 		
 		// run the query against the API
-		Stopper stopper = new StopperBasic();
 		BingSearch search = new BingSearch(params.getParamValue(Parameters.PARAM_NAME_USER_KEY));
 		search.setResultCount(Integer.parseInt(params.getParamValue(Parameters.PARAM_NAME_COUNT)));
 		search.setOffset(Integer.parseInt(params.getParamValue(Parameters.PARAM_NAME_OFFSET)));
 		search.runQuery(params.getParamValue(Parameters.PARAM_NAME_QUERY_TO_RUN));
-		List<SearchHit> hits = JsonToSearchHits.toSearchHits(search.getResultsAsJson(), stopper);
+		List<SearchHit> hits = JsonToSearchHits.toSearchHits(search.getResultsAsJson());
 		
 		// technically we don't need to sort these since they are given to us in order...this line
 		// is here simply to show how clients can sort SearchHits if they get re-scored.

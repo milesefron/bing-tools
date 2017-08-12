@@ -42,7 +42,6 @@ public class SearchPagingDemo {
 		
 		List<SearchHit> results = new LinkedList<SearchHit>();
 		String query = params.getParamValue(Parameters.PARAM_NAME_QUERY_TO_RUN);
-		Stopper stopper = new StopperBasic();
 		
 		// run our searches against the API
 		for(int i=0; i<SearchPagingDemo.NUMBER_OF_SEARCHES_TO_RUN; i++) {
@@ -50,7 +49,7 @@ public class SearchPagingDemo {
 			search.setResultCount(SearchPagingDemo.NUMBER_OF_HITS_PER_SEARCH);
 			search.runQuery(query);
 			String json = search.getResultsAsJson();
-			List<SearchHit> rr = JsonToSearchHits.toSearchHits(json, stopper);
+			List<SearchHit> rr = JsonToSearchHits.toSearchHits(json);
 			results.addAll(rr);
 			System.out.println((offset+1) + " - " + ((int)offset+rr.size()));
 			offset += rr.size();

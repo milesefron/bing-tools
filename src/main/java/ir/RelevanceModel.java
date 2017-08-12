@@ -5,6 +5,7 @@ import java.util.List;
 
 import data.FeatureVector;
 import data.SearchHit;
+import text.Stopper;
 import utils.StatUtils;
 
 public class RelevanceModel {
@@ -14,7 +15,7 @@ public class RelevanceModel {
 	 */
 	public double exponentialRateParam = 1.0;
 	
-	public FeatureVector getModel(List<SearchHit> hits) {
+	public FeatureVector getModel(List<SearchHit> hits, Stopper stopper) {
 		FeatureVector rm = new FeatureVector();
 		List<Double> scores = new ArrayList<Double>(hits.size());
 		double i=1.0;
@@ -25,6 +26,13 @@ public class RelevanceModel {
 		List<FeatureVector> vectors = new ArrayList<FeatureVector>(hits.size());
 		for(SearchHit hit : hits) {
 			FeatureVector v = hit.getTextVector();
+			FeatureVector stopped = new FeatureVector();
+			for(String feature : v.getFeatures()) {
+				if(stopper.contains(feature))
+					continue;
+				stopped.setFeatureValue(feature, v.getValue(feature));
+			}
+			v = stopped;
 			v.normalize();
 			vectors.add(v);
 		}

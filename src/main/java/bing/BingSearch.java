@@ -117,7 +117,6 @@ public class BingSearch {
 	public static final Pattern URL_PATTERN2 = Pattern.compile(BingSearch.REGEX_URL2);
 	
 	private String userSubscriptionID;
-	private Stopper stopper;
 	private int resultCount = 10;
 	private int offset = 0;
 	private String market = "en-us";
@@ -226,9 +225,7 @@ public class BingSearch {
 	public void setSafesearch(String safesearch) {
 		this.safesearch = safesearch;
 	}
-	public void setStopper(Stopper stopper) {
-		this.stopper = stopper;
-	}
+
 	
 	/**
 	 * For use if we've already run this query once.  This gets us to the state as if we

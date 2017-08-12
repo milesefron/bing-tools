@@ -72,7 +72,7 @@ public class SerpsToFeatureVector {
 			List<SearchHit> hits = null;
 
 			try {
-				hits = JsonToSearchHits.toSearchHits(json, stopper);
+				hits = JsonToSearchHits.toSearchHits(json);
 				System.err.println("parsed file: " + file);
 				for(SearchHit hit : hits) {
 					vector.addText(hit.getSnippet());

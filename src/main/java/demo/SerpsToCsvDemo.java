@@ -49,7 +49,6 @@ public class SerpsToCsvDemo {
 		File dir = new File(pathToInputData);
 		File[] files = dir.listFiles();
 
-		Stopper stopper = new StopperBasic();
 		String pathToOutFile = null;
 		if(args.length > 1)
 			pathToOutFile = args[1];
@@ -70,12 +69,10 @@ public class SerpsToCsvDemo {
 
 			// throw an exception and then move along if we encounter a file that isn't a JSON-encoded SERP object.
 			try {
-				List<SearchHit> hits = JsonToSearchHits.toSearchHits(json, stopper);
+				List<SearchHit> hits = JsonToSearchHits.toSearchHits(json);
 				System.err.println("parsed " + file);
 				for(SearchHit hit : hits) {
-					FeatureVector vector = new FeatureVector();
-					vector.setStopper(stopper);
-					
+					FeatureVector vector = new FeatureVector();					
 					vector.addText(hit.getUrl());
 					vector.addText(hit.getTitle());
 					vector.addText(hit.getSnippet());
