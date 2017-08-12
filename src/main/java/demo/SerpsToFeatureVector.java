@@ -2,21 +2,13 @@ package demo;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.net.URLDecoder;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
-import bing.BingSearch;
 import bing.JsonToSearchHits;
 import data.FeatureVector;
 import data.SearchHit;
 import text.Stopper;
-import text.StopperBasic;
 import text.StopperDummy;
 import text.StopperFile;
 
@@ -50,24 +42,27 @@ public class SerpsToFeatureVector {
 	 * getting skipped).
 	 */
 	public static void main(String[] args) throws Exception {
+		// housekeeping...find our list of files to process
 		String pathToData = args[0];
-		String pathToStopper = null;
-		if(args.length > 1)
-			pathToStopper = args[1];
-
 		File dir = new File(pathToData);
 		File[] files = dir.listFiles();
 
-
+		// check if the user has specified a stopper
+		String pathToStopper = null;
+		if(args.length > 1)
+			pathToStopper = args[1];
+		
 		Stopper stopper = null;
 		if(pathToStopper != null)
 			stopper = new StopperFile(pathToStopper);
 		else 
 			stopper = new StopperDummy();
 
+		// setup a FeatureVector to store all our result text.
 		FeatureVector vector = new FeatureVector();
 		vector.setStopper(stopper);
 
+		// iterate over our files, grabbing the text from each one and adding it to our FeatureVector.
 		for(File file : files) {
 
 			Scanner in = new Scanner(new FileInputStream(file));
@@ -77,7 +72,7 @@ public class SerpsToFeatureVector {
 			List<SearchHit> hits = null;
 
 			try {
-				hits = JsonToSearchHits.toSearchHits(json);
+				hits = JsonToSearchHits.toSearchHits(json, stopper);
 				System.err.println("parsed file: " + file);
 				for(SearchHit hit : hits) {
 					vector.addText(hit.getSnippet());

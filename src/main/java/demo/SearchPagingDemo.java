@@ -4,9 +4,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import bing.BingSearch;
+import bing.JsonToSearchHits;
 import config.Parameters;
 import config.ParametersTabImpl;
 import data.SearchHit;
+import text.Stopper;
+import text.StopperBasic;
 
 /**
  * Demo class that retrieved many results for a keyword query by repeated calls to the
@@ -25,11 +28,13 @@ public class SearchPagingDemo {
 	 * @throws Exception If the parameter file is ill-formed
 	 */
 	public static void main(String[] args) throws Exception {
+		// parse our parameter file
 		String pathToParams = args[0];
 		ParametersTabImpl params = new ParametersTabImpl();
 		params.setPathToParamSource(pathToParams);
 		params.readParams();
 		
+		// initialize our Bing search object
 		BingSearch search = new BingSearch(params.getParamValue(Parameters.PARAM_NAME_USER_KEY));
 		search.setResultCount(SearchPagingDemo.NUMBER_OF_HITS_PER_SEARCH);
 		int offset = 0;
@@ -37,15 +42,17 @@ public class SearchPagingDemo {
 		
 		List<SearchHit> results = new LinkedList<SearchHit>();
 		String query = params.getParamValue(Parameters.PARAM_NAME_QUERY_TO_RUN);
+		Stopper stopper = new StopperBasic();
 		
-		int totalRetrieved = 0;
+		// run our searches against the API
 		for(int i=0; i<SearchPagingDemo.NUMBER_OF_SEARCHES_TO_RUN; i++) {
 			search.setOffset(offset);
 			search.setResultCount(SearchPagingDemo.NUMBER_OF_HITS_PER_SEARCH);
-			List<SearchHit> rr = search.runQueryToSearchHits(query);
+			search.runQuery(query);
+			String json = search.getResultsAsJson();
+			List<SearchHit> rr = JsonToSearchHits.toSearchHits(json, stopper);
 			results.addAll(rr);
 			System.out.println((offset+1) + " - " + ((int)offset+rr.size()));
-			totalRetrieved += rr.size();
 			offset += rr.size();
 		}
 		

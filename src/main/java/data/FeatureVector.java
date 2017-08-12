@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -211,6 +212,27 @@ public class FeatureVector {
 		return true;
 	}
 	
+	
+	public static FeatureVector interpolate(List<Double> weights, List<FeatureVector> vectors) {
+		if(weights.size() != vectors.size())
+			throw new IllegalArgumentException("mis-matched list lengths.");
+		
+		FeatureVector interpolated = new FeatureVector();
+		Iterator<Double> wit = weights.iterator();
+		Iterator<FeatureVector> vit = vectors.iterator();
+		while(vit.hasNext()) {
+			Double score = wit.next();
+			FeatureVector v = vit.next();
+			
+			for(String term : v.getFeatures()) {
+				Double current = interpolated.getValue(term);
+				current += score * v.getValue(term);
+				interpolated.setFeatureValue(term, current);
+			}
+		}
+		return interpolated;
+		
+	}
 	private List<Tuple> getOrderedTuples() {
 		List<Tuple> tuples = new LinkedList<Tuple>();
 		for(String feature : vector.keySet()) {

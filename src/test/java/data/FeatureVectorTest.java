@@ -6,6 +6,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import text.Stopper;
+import text.StopperBasic;
+
 public class FeatureVectorTest {
 	private String text = "This is a TEST.  It is only a test.  Ignore 'everything' else. xz.";
 	private FeatureVector vector;
@@ -50,6 +53,8 @@ public class FeatureVectorTest {
 	@Test
 	public void addTextInvokesCleaning() {
 		vector = new FeatureVector();
+		Stopper stopper = new StopperBasic();
+		vector.setStopper(stopper);
 		vector.addText(text);
 		
 		/**

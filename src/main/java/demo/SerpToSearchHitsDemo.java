@@ -14,7 +14,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import bing.BingSearch;
-import data.FeatureVector;
 import data.SearchHit;
 import data.SearchHitComparator;
 
@@ -35,7 +34,6 @@ public class SerpToSearchHitsDemo {
 	 * @throws Exception This may be encountered if the supplied file is bogus.  
 	 */
 	public static void main(String[] args) throws Exception {
-
 		File inFile = new File(args[0]);
 
 		List<SearchHit> hits = new LinkedList<SearchHit>();

@@ -4,10 +4,13 @@ import java.util.Collections;
 import java.util.List;
 
 import bing.BingSearch;
+import bing.JsonToSearchHits;
 import config.Parameters;
 import config.ParametersTabImpl;
 import data.SearchHit;
 import data.SearchHitComparator;
+import text.Stopper;
+import text.StopperBasic;
 
 /**
  * Demo class that runs a query against the Bing API.  The class retrieves the results as a
@@ -20,15 +23,19 @@ public class SearchToListDemo {
 
 	
 	public static void main(String[] args) throws Exception {
+		// setup our parameters
 		String pathToParams = args[0];
 		ParametersTabImpl params = new ParametersTabImpl();
 		params.setPathToParamSource(pathToParams);
 		params.readParams();
 		
+		// run the query against the API
+		Stopper stopper = new StopperBasic();
 		BingSearch search = new BingSearch(params.getParamValue(Parameters.PARAM_NAME_USER_KEY));
 		search.setResultCount(Integer.parseInt(params.getParamValue(Parameters.PARAM_NAME_COUNT)));
 		search.setOffset(Integer.parseInt(params.getParamValue(Parameters.PARAM_NAME_OFFSET)));
-		List<SearchHit> hits = search.runQueryToSearchHits(params.getParamValue(Parameters.PARAM_NAME_QUERY_TO_RUN));
+		search.runQuery(params.getParamValue(Parameters.PARAM_NAME_QUERY_TO_RUN));
+		List<SearchHit> hits = JsonToSearchHits.toSearchHits(search.getResultsAsJson(), stopper);
 		
 		// technically we don't need to sort these since they are given to us in order...this line
 		// is here simply to show how clients can sort SearchHits if they get re-scored.

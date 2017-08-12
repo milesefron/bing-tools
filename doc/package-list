@@ -2,5 +2,6 @@ bing
 config
 data
 demo
+ir
 text
 utils

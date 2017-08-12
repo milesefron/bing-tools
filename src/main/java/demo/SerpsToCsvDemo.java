@@ -44,12 +44,12 @@ public class SerpsToCsvDemo {
 	 * getting skipped).
 	 */
 	public static void main(String[] args) throws Exception {
+		// find the files we are going to parse
 		String pathToInputData = args[0];		
 		File dir = new File(pathToInputData);
 		File[] files = dir.listFiles();
 
 		Stopper stopper = new StopperBasic();
-		
 		String pathToOutFile = null;
 		if(args.length > 1)
 			pathToOutFile = args[1];
@@ -70,7 +70,7 @@ public class SerpsToCsvDemo {
 
 			// throw an exception and then move along if we encounter a file that isn't a JSON-encoded SERP object.
 			try {
-				List<SearchHit> hits = JsonToSearchHits.toSearchHits(json);
+				List<SearchHit> hits = JsonToSearchHits.toSearchHits(json, stopper);
 				System.err.println("parsed " + file);
 				for(SearchHit hit : hits) {
 					FeatureVector vector = new FeatureVector();

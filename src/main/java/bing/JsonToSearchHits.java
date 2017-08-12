@@ -12,6 +12,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import data.SearchHit;
+import text.Stopper;
 
 /**
  * Translates search results stored in a JSON object as returned by the Bing API into
@@ -22,7 +23,15 @@ import data.SearchHit;
  */
 public class JsonToSearchHits {
 
-	public static List<SearchHit> toSearchHits(String json) throws ParseException, UnsupportedEncodingException {
+	/**
+	 * 
+	 * @param json JSON output of a web search
+	 * @param stopper An object of type {@link text.Stopper}.  If null, no stopping is done.
+	 * @return
+	 * @throws ParseException
+	 * @throws UnsupportedEncodingException
+	 */
+	public static List<SearchHit> toSearchHits(String json, Stopper stopper) throws ParseException, UnsupportedEncodingException {
 		List<SearchHit> hits = new LinkedList<SearchHit>();
 		
 
@@ -32,19 +41,26 @@ public class JsonToSearchHits {
 			JSONArray jsonArray = (JSONArray) temp.get(BingSearch.API_JSON_KEY_2);
 			@SuppressWarnings("unchecked")
 			Iterator<JSONObject> it = jsonArray.iterator();
+			double rank = 1.0;
 			while(it.hasNext()) {
 				SearchHit hit = new SearchHit();
+				hit.setStopper(stopper);
 				jsonObject = it.next();
 				hit.setTitle((String)jsonObject.get(BingSearch.RESULTS_FIELD_NAME));
+				hit.addTextToVector(hit.getTitle());
 				
 				String url = (String)jsonObject.get(BingSearch.RESULTS_FIELD_URL);
 				url = url.replaceFirst(BingSearch.REGEX_URL1, "");
 				url = url.replaceAll(BingSearch.REGEX_URL2, "");
 				url = URLDecoder.decode(url, "UTF-8");
 				hit.setUrl(url);
-
-				hit.setSnippet((String)jsonObject.get(BingSearch.RESULTS_FIELD_SNIPPET));
+				hit.addTextToVector(hit.getUrl());
 				
+				hit.setSnippet((String)jsonObject.get(BingSearch.RESULTS_FIELD_SNIPPET));
+				hit.addTextToVector(hit.getSnippet());
+				
+				// use a made-up score for now
+				hit.setScore(1.0 / rank++);
 				hits.add(hit);
 			}
 		

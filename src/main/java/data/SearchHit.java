@@ -1,5 +1,7 @@
 package data;
 
+import text.Stopper;
+
 /**
  * Simple container for representing a single web search result.
  * @author Miles Efron
@@ -10,7 +12,7 @@ public class SearchHit {
 	private String title;
 	private String snippet;
 	private FeatureVector vector;
-	
+	private Stopper stopper;
 	private double score = 0.0;
 
 	public SearchHit() {
@@ -22,6 +24,7 @@ public class SearchHit {
 	 * @param text zero or more words to be added to this object's feature vector.
 	 */
 	public void addTextToVector(String text) {
+		vector.setStopper(stopper);
 		vector.addText(text);
 	}
 	
@@ -56,6 +59,10 @@ public class SearchHit {
 	public void setSnippet(String snippet) {
 		this.snippet = snippet;
 	}
+	public void setStopper(Stopper stopper) {
+		this.stopper = stopper;
+	}
+	
 
 	/**
 	 * Returns the query-document similarity score for this Search Hit.  If we're not re-scoring our

@@ -19,6 +19,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import data.SearchHit;
+import text.Stopper;
 
 /**
  * Provides access to functionality delivered by v5.0 of the Bing Web Search API.
@@ -116,13 +117,15 @@ public class BingSearch {
 	public static final Pattern URL_PATTERN2 = Pattern.compile(BingSearch.REGEX_URL2);
 	
 	private String userSubscriptionID;
-	
+	private Stopper stopper;
 	private int resultCount = 10;
 	private int offset = 0;
 	private String market = "en-us";
 	private String safesearch = "Off";
 	
 	private String queryString;
+	
+	private String resultsJson;
 	
 	
 	/**
@@ -135,66 +138,26 @@ public class BingSearch {
 	
 	/**
 	 * Runs a query and fetches the results as a JSON String
-	 * @param queryString The keyword query we're going to run
 	 * @return Search results encoded as a JSON object in the MS-defined format returned by the API endpoint
 	 * @throws Exception Network or formatting problems.
 	 */
-	public String runQueryToJson(String queryString) throws Exception {
-		String json = runQuery(queryString);
-		return json;
-	}
-	
-	/**
-	 * Runs a query and fetches the results as a List of {@link data.SearchHit} objects.
-	 * @param queryString The keyword query we're going to run
-	 * @return A Java {@link java.util.List} object of {@link data.SearchHit}s containing the search results
-	 * @throws Exception Network or formatting problems.
-	 */
-	public List<SearchHit> runQueryToSearchHits(String queryString) throws Exception {
-		String json = runQuery(queryString);
-		
-		List<SearchHit> hits = new LinkedList<SearchHit>();
-		
-		// used to generate placeholder document scores
-		int rank = 1;
-
-		JSONParser parser = new JSONParser();
-		JSONObject jsonObject = (JSONObject) parser.parse(json);
-		JSONObject temp = (JSONObject) jsonObject.get(BingSearch.API_JSON_KEY_1);
-		JSONArray jsonArray = (JSONArray) temp.get(BingSearch.API_JSON_KEY_2);
-		@SuppressWarnings("unchecked")
-		Iterator<JSONObject> it = jsonArray.iterator();
-		while(it.hasNext()) {
-			SearchHit hit = new SearchHit();
-			
-			// use a made-up score for now
-			hit.setScore(1.0 / rank++);
-			
-			jsonObject = it.next();
-			hit.setTitle((String)jsonObject.get(BingSearch.RESULTS_FIELD_NAME));
-			hit.addTextToVector(hit.getTitle());
-			String url = (String)jsonObject.get(BingSearch.RESULTS_FIELD_URL);
-			url = url.replaceFirst(BingSearch.REGEX_URL1, "");
-			url = url.replaceAll(BingSearch.REGEX_URL2, "");
-			url = URLDecoder.decode(url, "UTF-8");
-			hit.setUrl(url);
-			hit.addTextToVector(hit.getUrl());
-			
-			hit.setSnippet((String)jsonObject.get(BingSearch.RESULTS_FIELD_SNIPPET));
-			hit.addTextToVector(hit.getSnippet());
-			
-			hits.add(hit);
+	public String getResultsAsJson() throws Exception {
+		if(resultsJson == null) {
+			throw new IllegalStateException("Can't fetch API results because the API hasn't been called yet.");
 		}
-
-		
-		return hits;
+		return resultsJson;
 	}
 	
-	
-	
+
 	
 
-	private String runQuery(String queryString) throws Exception {
+	/**
+	 * This is the workhorse method of this class.  This method actually runs the query against the 
+	 * API.
+	 * @param queryString the keyword query we want to run
+	 * @throws Exception Thrown if the BingSearch ojbect is in a weird state.
+	 */
+	public void runQuery(String queryString) throws Exception {
 		this.queryString = queryString;
 		checkStatus();
 		
@@ -218,7 +181,7 @@ public class BingSearch {
 	    String jsonString = builder.toString();
 	    
 	    
-	    return jsonString;
+	    resultsJson = jsonString;
 	}
 	
 	private URI getSearchURI() {
@@ -263,6 +226,17 @@ public class BingSearch {
 	public void setSafesearch(String safesearch) {
 		this.safesearch = safesearch;
 	}
+	public void setStopper(Stopper stopper) {
+		this.stopper = stopper;
+	}
 	
+	/**
+	 * For use if we've already run this query once.  This gets us to the state as if we
+	 * have just run our query.
+	 * @param resultsJson A JSON string containing the results of a web search.
+	 */
+	public void setResultsJson(String resultsJson) {
+		this.resultsJson = resultsJson;
+	}
 	
 }
