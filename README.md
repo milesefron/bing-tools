@@ -14,9 +14,8 @@ For examples on using this library, see the classes in the `demo` package.
 In terms of running queries and getting the results, most clients will do something like so:
 
 ```java
-Stopper = new StopperBasic();
 BingSearch = new BingSearch(<insert API key here>);
 search.runQuery(<keyword query to run>);
 String resultsAsJson = search.getResultsAsJson();
-List<SearchHit> hits = JsonToSearchHits(json, stopper);
+List<SearchHit> hits = JsonToSearchHits(json);
 ```
