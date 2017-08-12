@@ -21,9 +21,7 @@ List<SearchHit> hits = JsonToSearchHits(json);
 ```
  ### Navigating
 This repo's structure is like so:
-<ul>
-<li/>The `config` directory contains a sample stoplist.
-<li/>`data` contains the results of a few sample API calls.
-<li/> `doc` contains the Javadoc for the project.
-<li/> `src`, of course, contains the source code.
-</ul>
+The `config` directory contains a sample stoplist.
+`data` contains the results of a few sample API calls.
+`doc` contains the Javadoc for the project.
+`src`, of course, contains the source code.
